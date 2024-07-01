@@ -16,6 +16,8 @@ class VideosController extends GetxController {
   final RxList<Video> videos = <Video>[].obs;
   final VideosApi videosApi = Get.put(VideosApi());
   final session = GetStorage().read("session");
+  late final userSession = session['user']['id'];
+  late final String tokenSession = session['accessToken'];
 
   final TextEditingController textVideoTitleController =
       TextEditingController();
@@ -25,7 +27,8 @@ class VideosController extends GetxController {
   Future<void> getAllFromUser() async {
     try {
       videoLoading(true);
-      Response<List<Video>> response = await videosApi.getAllFromUser(session['user']['id']);
+      Response<List<Video>> response =
+          await videosApi.getAllFromUser(userSession);
       if (response.statusCode == 200) {
         videos(response.body);
       }
@@ -38,16 +41,19 @@ class VideosController extends GetxController {
     final Video video = Video(
       thumbURL: textVideoThumbNailController.text,
       title: textVideoTitleController.text,
-      userId: session['user']['id'],
+      userId: userSession,
     );
     try {
-      Response<void> response = await videosApi.create(video,
-          session['acessToken']);
+      Response<void> response =
+          await videosApi.create(video, tokenSession);
       if (response.statusCode == 201) {
         AppSnacks.getSuccessUpload();
         getAllFromUser();
       } else {
-        AppSnacks.getErrorUpload();
+        Get.defaultDialog(
+            title: "Error ao adicionar um video",
+            middleText:
+                "Verifique as informações e tente novamente!");
         throw response.statusText!;
       }
     } catch (e) {

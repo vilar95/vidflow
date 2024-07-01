@@ -49,7 +49,11 @@ class Upload extends StatelessWidget {
               children: <Widget>[
                 CustomButton(
                   onTap: () {
-                    videosController.create();
+                    try {
+                      videosController.create();
+                    } catch (e) {
+                      print(e);
+                    }
                   },
                   text: "Adicionar vídeo",
                   icon: Icons.login,
